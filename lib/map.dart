@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import 'City.dart';
-
+import 'package:hello_lbs_flutter/city.dart';
 
 class MapScreen extends StatefulWidget {
+
   final List<City> cities;
 
   MapScreen(this.cities);
@@ -16,36 +16,56 @@ class MapScreen extends StatefulWidget {
 }
 
 class MapState extends State<MapScreen> {
+  Completer<GoogleMapController> _controller = Completer();
 
   Set<Marker> citiesMarkers = Set();
+  
+  static const platform = const MethodChannel('flutter.dev/geolocation');
+
+  Future<void> _geolocation() async {
+  try {
+    final String result = await platform.invokeMethod('getLocation');
+    List<String> positions = result.split(",");
+
+    CameraPosition myLocation = CameraPosition(
+      target: LatLng(
+        double.parse(positions[0]),
+        double.parse(positions[1])
+      ),
+      zoom: 14.4746,
+    );
+
+    final GoogleMapController controller = await _controller.future;
+      controller.animateCamera(CameraUpdate.newCameraPosition(myLocation));
+    } on PlatformException catch (e) {
+      print("recebeu erro ${e.message}'.");
+    }
+  }
+
 
   @override
   void initState() {
     for (City city in widget.cities){
       citiesMarkers.add(
-          Marker(
-            markerId: MarkerId(city.name),
-            position: LatLng(
-              city.latitude,
-              city.longitude,
-            ),
-            infoWindow: InfoWindow(
-                title: city.name,
-                snippet: city.state),
-          ));
+        Marker(
+          markerId: MarkerId(city.name),
+          position: LatLng(
+            city.latitude,
+            city.longitude,
+          ),
+          infoWindow: InfoWindow(
+            title: city.name, 
+            snippet: city.state),
+        ));
     }
-
     super.initState();
   }
 
-  Completer<GoogleMapController> _controller = Completer();
 
   static final CameraPosition _kFiap = CameraPosition(
     target: LatLng(-23.595439, -46.685302),
     zoom: 14.4746,
   );
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +79,9 @@ class MapState extends State<MapScreen> {
         markers: citiesMarkers,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){},
-
+        onPressed: (){
+          _geolocation();
+        },
         child: Icon(Icons.gps_fixed),
       ),
     );

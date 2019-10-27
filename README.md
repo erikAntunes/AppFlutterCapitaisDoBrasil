@@ -1,6 +1,6 @@
-# location_app
+# hello_lbs_flutter
 
-A new Flutter application.
+A new Flutter project.
 
 ## Getting Started
 

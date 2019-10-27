@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:location_app/map.dart';
-
-import 'City.dart';
+import 'city.dart';
+import 'package:hello_lbs_flutter/map.dart';
 
 void main() => runApp(MyApp());
 
@@ -10,12 +9,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Location',
+      title: 'Flutter Demo',
       theme: ThemeData(
-
-        primarySwatch: Colors.amber,
+        primarySwatch: Colors.green,
       ),
-      home: MyHomePage(title: 'Capitais do Brasil'),
+      home: MyHomePage(title: 'Capitais Do Brasil'),
     );
   }
 }
@@ -23,6 +21,14 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
 
   final String title;
 
@@ -31,8 +37,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-
   final List<City> entries = <City>[
     City("Rio Branco", "Acre", -9.971000, -67.822947),
     City("Maceió", "Alagoas", -9.663054, -35.730784),
@@ -63,33 +67,47 @@ class _MyHomePageState extends State<MyHomePage> {
     City("Brasília", "Distrito Federal", -15.793949, -47.882917)
   ];
 
-
-
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         actions: <Widget>[
           IconButton(
+            icon: Icon(Icons.check_box),
+            onPressed: () {
+              setState(() {
+                for (City city in entries){
+                  city.checked = true;
+                }
+              });
+            },
+          ),
+          IconButton(
+              icon: const Icon(Icons.check_box_outline_blank),
+              onPressed: () {
+                setState(() {
+                  for (City city in entries){
+                    city.checked = false;
+                  }
+                });
+              },
+            ),
+          IconButton(
             icon: const Icon(Icons.navigate_next),
             onPressed: () {
-
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          MapScreen(entries.where(
-                                  (city){
-                                return city.checked;
-                              }
-                          ).toList()
-                          )
-
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                    MapScreen(entries.where(
+                          (city){
+                            return city.checked;
+                          }
+                        ).toList()
+                      )
                   )
-              );
+                );
             },
           ),
         ],
@@ -97,24 +115,22 @@ class _MyHomePageState extends State<MyHomePage> {
       body: ListView.separated(
         padding: const EdgeInsets.all(8),
         itemCount: entries.length,
+        //função anônima
         itemBuilder: (BuildContext context, int index) {
           return CheckboxListTile(
-            title: Text('${entries[index].name}'),
+            title: Text('${entries[index].name} - ${entries[index].state}}'),
             value: entries[index].checked,
             onChanged: (bool value) {
               setState(() {
                 entries[index].checked = value;
-              }
+                }
               );
             },
-            secondary: const Icon(Icons.add_location),
+            secondary: Icon(Icons.add_location),
           );
-
         },
         separatorBuilder: (BuildContext context, int index) => const Divider(),
-      ),
-
-      // This trailing comma makes auto-formatting nicer for build methods.
+      ),// This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
